@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demo Store — Checkout</title>
+</head>
+<body>
+
+  <div id="app">
+
+    <header>
+      <h1>Demo Store</h1>
+    </header>
+
+    <main>
+
+      <!-- Order Summary -->
+      <section id="order-summary">
+        <h2>Order Summary</h2>
+        <div class="product">
+          <span>Pro Headphones X3</span>
+          <span>£10.00</span>
+        </div>
+        <div class="total">
+          <strong>Total: £10.00</strong>
+        </div>
+      </section>
+
+      <!-- Payment Section -->
+      <section id="payment">
+        <h2>Payment</h2>
+
+        <!-- Revolut Pay button will be injected here by the SDK -->
+        <div id="revolut-pay-button"></div>
+
+        <!-- Status messages -->
+        <div id="status"></div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script>
+    const PUBLIC_KEY = 'pk_2qXiyDdxAL0dTg8EMUoeoEGIiAtO8Im9XishFA7nmZlOSOKw'
+
+async function initRevolutPay() {
+  const { revolutPay } = await RevolutCheckout.payments({
+    publicToken: PUBLIC_KEY,
+    locale: 'en',
+    mode: 'sandbox'
+  });
+
+  revolutPay.mount(document.getElementById('revolut-pay-button'), {
+    currency: 'GBP',
+    totalAmount: 1000, // £10.00 in minor units
+
+createOrder: async () => {
+  console.log('createOrder called');
+  const res = await fetch('/api/create-order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount: 1000, currency: 'GBP' })
+  });
+  const data = await res.json();
+  console.log('Backend response:', data);
+  console.log('Returning publicId:', data.token);
+  return { publicId: data.token };
+},
+
+    redirectUrls: {
+      success: 'http://localhost:3000/payment-result?status=success',
+      failure: 'http://localhost:3000/payment-result?status=failure',
+      cancel:  'http://localhost:3000/payment-result?status=cancel'
+    }
+  });
+
+  revolutPay.on('payment', (event) => {
+    const status = document.getElementById('status');
+    if (event.type === 'success') {
+      status.textContent = '✅ Payment successful!';
+    } else if (event.type === 'error') {
+      status.textContent = `❌ Payment failed: ${event.error.message}`;
+    } else if (event.type === 'cancel') {
+      status.textContent = '🚫 Payment cancelled.';
+    }
+  });
+}
+  </script>
+
+<script type="module">
+  import RevolutCheckout from 'https://unpkg.com/@revolut/checkout/esm';
+  window.RevolutCheckout = RevolutCheckout;
+  window.addEventListener('load', initRevolutPay);
+</script>
+<script>
+  window.addEventListener('load', initRevolutPay);
+</script>
+
+</body>
+</html>

@@ -108,7 +108,7 @@ app.get('/payment-result', (req, res) => {
 });
 
 //static files 
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, 'public')))
 
 
 //Webhook
