@@ -1,0 +1,4 @@
+node_modules/ 
+.env 
+curl 
+public/index.V1.html 
