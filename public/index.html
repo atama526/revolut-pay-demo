@@ -312,10 +312,10 @@
           return { publicId: data.token };
         },
         redirectUrls: {
-          success: 'http://localhost:3000/payment-result?status=success',
-          failure: 'http://localhost:3000/payment-result?status=failure',
-          cancel:  'http://localhost:3000/payment-result?status=cancel'
-        }
+          success: 'https://revolut-pay-demo-production.up.railway.app/payment-result?status=success',
+          failure: 'https://revolut-pay-demo-production.up.railway.app/payment-result?status=failure',
+          cancel:  'https://revolut-pay-demo-production.up.railway.app/payment-result?status=cancel'
+        },
       });
 
       revolutPay.on('payment', (event) => {
