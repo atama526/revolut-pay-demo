@@ -188,6 +188,40 @@
   #status.success { display: block; background: #f0fdf4; border: 1px solid #a7f3d0; color: #065f46; }
   #status.error   { display: block; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
   #status.cancel  { display: block; background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; }
+
+  @media (max-width: 480px) {
+  #app {
+    margin: 16px auto;
+    padding: 0 12px;
+  }
+
+  section {
+    padding: 20px 16px;
+  }
+
+  #order-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #order-controls label {
+    margin-bottom: 2px;
+  }
+
+  #generate-btn {
+    width: 100%;
+  }
+
+  #scenario-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  footer {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+}
 </style>
 
   <title>Demo Store — Checkout</title>
