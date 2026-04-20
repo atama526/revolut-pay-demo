@@ -174,6 +174,7 @@
 
   /* ── Revolut Pay button container ── */
   #revolut-pay-button { margin: 20px 0 8px; min-height: 48px; }
+  #revolut-pay-button {display: none; }
 
   /* ── Status ── */
   #status {
@@ -261,29 +262,42 @@
   <script>
     const PUBLIC_KEY = 'pk_2qXiyDdxAL0dTg8EMUoeoEGIiAtO8Im9XishFA7nmZlOSOKw';
     let currentAmount = 1000;
-
+    let currentToken = null
     let revolutPayInstance = null;
 
-    async function generateOrder() {
-      const input = document.getElementById('amount-input');
-      const pounds = parseFloat(input.value);
+  async function generateOrder() {
+    const input = document.getElementById('amount-input');
+    const pounds = parseFloat(input.value);
 
-      if (isNaN(pounds) || pounds <= 0) {
-        document.getElementById('order-info').textContent = '⚠️ Please enter a valid amount.';
-        return;
-      }
-
-      currentAmount = Math.round(pounds * 100);
-      document.getElementById('summary-total').textContent = `£${pounds.toFixed(2)}`;
-      document.getElementById('product-price').textContent = `£${pounds.toFixed(2)}`;
-      document.getElementById('order-info').textContent = `Order ready: £${pounds.toFixed(2)}`;
-      document.getElementById('status').textContent = '';
-
-      if (!widgetInitialised) {
-        await initRevolutPay(currentAmount);
-        widgetInitialised = true;
-      }
+    if (isNaN(pounds) || pounds <= 0) {
+      document.getElementById('order-info').textContent = '⚠️ Please enter a valid amount.';
+      return;
     }
+
+    currentAmount = Math.round(pounds * 100);
+    document.getElementById('order-info').textContent = 'Creating order...';
+    document.getElementById('order-id').textContent = '';
+    document.getElementById('status').textContent = '';
+    document.getElementById('status').className = '';
+    document.getElementById('revolut-pay-button').style.display = 'none';
+
+    try {
+      const res = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: currentAmount, currency: 'GBP' })
+      });
+      const data = await res.json();
+
+      currentToken = data.token;
+      document.getElementById('order-info').textContent = `Order ready: £${pounds.toFixed(2)}`;
+      document.getElementById('order-id').textContent = `Order ID: ${data.orderId}`;
+      document.getElementById('revolut-pay-button').style.display = 'block';
+
+    } catch (err) {
+      document.getElementById('order-info').textContent = '⚠️ Failed to create order. Try again.';
+    }
+  }
 
     function setScenario(amountInPence) {
       const pounds = amountInPence / 100;
@@ -302,14 +316,8 @@
         currency: 'GBP',
         totalAmount: currentAmount,
        createOrder: async () => {
-        const res = await fetch('/api/create-order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: currentAmount, currency: 'GBP' })
-          });
-          const data = await res.json();
-          document.getElementById('order-id').textContent = `Order ID: ${data.orderId}`;
-          return { publicId: data.token };
+        
+          return { publicId: currentToken };
         },
         redirectUrls: {
           success: 'https://revolut-pay-demo-production.up.railway.app/payment-result?status=success',
